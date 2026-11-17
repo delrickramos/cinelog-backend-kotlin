@@ -26,5 +26,9 @@ class User(
         joinColumns = [JoinColumn(name = "idUser")],
         inverseJoinColumns = [JoinColumn(name = "idRole")],
     )
-    var roles: MutableSet<Role> = mutableSetOf()
+    var roles: MutableSet<Role> = mutableSetOf(),
+
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinColumn(name = "idProfile", referencedColumnName = "id")
+    var profile: UserProfile? = null
 )

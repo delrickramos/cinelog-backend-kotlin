@@ -3,6 +3,7 @@ package br.pucpr.cinelog.users
 import br.pucpr.cinelog.directors.Director
 import br.pucpr.cinelog.genres.Genre
 import br.pucpr.cinelog.movies.Movie
+import br.pucpr.cinelog.reviews.Review
 import br.pucpr.cinelog.roles.Role
 
 fun oneUser(
@@ -10,13 +11,15 @@ fun oneUser(
     name: String = "John Doe",
     email: String = "${name.lowercase().replace(" ", ".")}@email.com",
     password: String = "password",
-    roles: MutableSet<Role> = mutableSetOf()
+    roles: MutableSet<Role> = mutableSetOf(),
+    profile: UserProfile? = null
 ) = User(
     id = id,
     email = email,
     password = password,
     name = name,
-    roles = roles
+    roles = roles,
+    profile = profile
 )
 
 fun oneDirector(
@@ -61,4 +64,18 @@ fun oneMovie(
     posterUrl = posterUrl,
     director = director,
     genres = genres
+)
+
+fun oneReview(
+    id: Long? = 1L,
+    rating: Int = 10,
+    comment: String = "Masterpiece!",
+    user: User = oneUser(),
+    movie: Movie = oneMovie()
+) = Review(
+    id = id,
+    rating = rating,
+    comment = comment,
+    user = user,
+    movie = movie
 )

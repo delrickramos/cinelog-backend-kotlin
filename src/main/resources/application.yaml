@@ -1,6 +1,8 @@
 spring:
   application:
     name: cinelog
+  config:
+    import: "classpath:security.yaml"
   web:
     error:
       whitelabel:

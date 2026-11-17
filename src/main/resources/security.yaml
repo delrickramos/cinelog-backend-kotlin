@@ -1,0 +1,5 @@
+security:
+  issuer: "PUCPR CineLog Server"
+  secret: "71788c9917e649982c017c177fb53a3e134b26d1c6e85374a88f274e79716a9f"
+  expireHours: 24
+  adminExpireHours: 2

@@ -1,12 +1,17 @@
 package br.pucpr.cinelog.users
 
+import br.pucpr.cinelog.users.requests.LoginRequest
 import br.pucpr.cinelog.users.requests.PatchUserRequest
+import br.pucpr.cinelog.users.requests.UserProfileRequest
 import br.pucpr.cinelog.users.requests.UserRequest
+import br.pucpr.cinelog.users.responses.LoginResponse
 import br.pucpr.cinelog.users.responses.UserResponse
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -33,34 +38,59 @@ class UserController(
     @PostMapping
     fun insert(
         @Valid @RequestBody user: UserRequest
-    ) = userService.insert(user.toUser())
-        .let { UserResponse(it) }
-        .let { ResponseEntity.status(HttpStatus.CREATED).body(it) }
+    ): ResponseEntity<UserResponse> =
+        userService.insert(user.toUser())
+            .let { UserResponse(it) }
+            .let { ResponseEntity.status(HttpStatus.CREATED).body(it) }
+
+    @PostMapping("/login")
+    fun login(
+        @Valid @RequestBody login: LoginRequest
+    ): ResponseEntity<LoginResponse> =
+        userService.login(login.email!!, login.password!!)
+            ?.let { ResponseEntity.ok(it) }
+            ?: ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
     @PatchMapping("/{id}")
     fun update(
         @Min(1) @PathVariable id: Long,
         @Valid @RequestBody user: PatchUserRequest
-    ) = userService.update(id, user.name!!)
-        ?.let { UserResponse(it) }
-        ?.let { ResponseEntity.ok(it) }
-        ?: ResponseEntity.noContent().build()
+    ): ResponseEntity<UserResponse> =
+        userService.update(id, user.name!!)
+            ?.let { UserResponse(it) }
+            ?.let { ResponseEntity.ok(it) }
+            ?: ResponseEntity.noContent().build()
+
+    @PutMapping("/{id}/profile")
+    fun updateProfile(
+        @Min(1) @PathVariable id: Long,
+        @Valid @RequestBody profile: UserProfileRequest
+    ): ResponseEntity<UserResponse> =
+        userService.updateProfile(id, profile.toUserProfile())
+            .let { UserResponse(it) }
+            .let { ResponseEntity.ok(it) }
 
     @GetMapping("/{id}")
     fun getById(
         @Min(1) @PathVariable id: Long
-    ) = userService.findByIdOrNull(id)
-        ?.let { UserResponse(it) }
-        ?.let { ResponseEntity.ok(it) }
-        ?: ResponseEntity.notFound().build()
+    ): ResponseEntity<UserResponse> =
+        userService.findByIdOrNull(id)
+            ?.let { UserResponse(it) }
+            ?.let { ResponseEntity.ok(it) }
+            ?: ResponseEntity.notFound().build()
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun deleteById(
         @Min(1) @PathVariable id: Long
-    ): ResponseEntity<Void> = userService.deleteById(id)
-        .let { ResponseEntity.ok().build() }
+    ): ResponseEntity<Void> =
+        if (userService.deleteById(id)) ResponseEntity.ok().build()
+        else ResponseEntity.notFound().build()
 
     @PutMapping("/{id}/roles/{name}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun grant(
         @Min(1) @PathVariable id: Long,
         @PathVariable name: String

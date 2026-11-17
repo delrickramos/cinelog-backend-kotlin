@@ -25,6 +25,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
 	implementation("tools.jackson.module:jackson-module-kotlin")
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -41,6 +43,13 @@ dependencies {
 	testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotest")
 	testImplementation("io.kotest:kotest-assertions-core:$kotest")
 	testImplementation("io.mockk:mockk-jvm:1.14.11")
+
+	// Security
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	val jjwt = "0.13.0"
+	implementation("io.jsonwebtoken:jjwt:$jjwt")
+	implementation("io.jsonwebtoken:jjwt-jackson:$jjwt")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwt")
 }
 
 kotlin {

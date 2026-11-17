@@ -4,6 +4,7 @@ import br.pucpr.cinelog.movies.requests.MovieRequest
 import br.pucpr.cinelog.movies.requests.PatchMovieRequest
 import br.pucpr.cinelog.movies.responses.MovieResponse
 import br.pucpr.cinelog.users.SortDir
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
@@ -19,17 +20,16 @@ class MovieController(
 ) {
     @GetMapping
     fun list(
-        @RequestParam sortDir: String?,
-        @RequestParam genre: String?
-    ): ResponseEntity<List<MovieResponse>> {
-        val movies = if (genre != null) service.findByGenre(genre)
-        else SortDir.findOrThrow(sortDir ?: "ASC")
-            .let { service.findAll(it) }
-
-        return movies
+        @RequestParam genre: String?,
+        @RequestParam directorId: Long?,
+        @RequestParam minYear: Int?,
+        @RequestParam title: String?,
+        @RequestParam sortDir: String?
+    ): ResponseEntity<List<MovieResponse>> =
+        SortDir.findOrThrow(sortDir ?: "ASC")
+            .let { service.findAll(genre, directorId, minYear, title, it) }
             .map { MovieResponse(it) }
             .let { ResponseEntity.ok(it) }
-    }
 
     @GetMapping("/{id}")
     fun getById(
@@ -48,22 +48,39 @@ class MovieController(
             .let { MovieResponse(it) }
             .let { ResponseEntity.status(HttpStatus.CREATED).body(it) }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     fun update(
+        @Min(1) @PathVariable id: Long,
+        @Valid @RequestBody request: MovieRequest
+    ): ResponseEntity<MovieResponse> =
+        service.update(id, request.toMovie(), request.directorId)
+            .let { MovieResponse(it) }
+            .let { ResponseEntity.ok(it) }
+
+    @PatchMapping("/{id}")
+    fun patch(
         @Min(1) @PathVariable id: Long,
         @Valid @RequestBody request: PatchMovieRequest
     ): ResponseEntity<MovieResponse> =
-        service.patch(id, request.title)
+        service.patch(
+            id = id,
+            title = request.title,
+            synopsis = request.synopsis,
+            releaseYear = request.releaseYear,
+            durationMinutes = request.durationMinutes,
+            posterUrl = request.posterUrl
+        )
             ?.let { MovieResponse(it) }
             ?.let { ResponseEntity.ok(it) }
             ?: ResponseEntity.noContent().build()
 
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "AuthServer")
     fun deleteById(
         @Min(1) @PathVariable id: Long
     ): ResponseEntity<Void> =
-        service.deleteById(id)
-            .let { ResponseEntity.ok().build() }
+        if (service.deleteById(id)) ResponseEntity.ok().build()
+        else ResponseEntity.notFound().build()
 
     @PutMapping("/{id}/genres/{genreName}")
     fun addGenre(
@@ -71,5 +88,30 @@ class MovieController(
         @PathVariable genreName: String
     ): ResponseEntity<Void> =
         if (service.addGenre(id, genreName)) ResponseEntity.ok().build()
+        else ResponseEntity.noContent().build()
+
+    @DeleteMapping("/{id}/genres/{genreName}")
+    @SecurityRequirement(name = "AuthServer")
+    fun removeGenre(
+        @Min(1) @PathVariable id: Long,
+        @PathVariable genreName: String
+    ): ResponseEntity<Void> =
+        if (service.removeGenre(id, genreName)) ResponseEntity.ok().build()
+        else ResponseEntity.noContent().build()
+
+    @PutMapping("/{id}/director/{directorId}")
+    fun setDirector(
+        @Min(1) @PathVariable id: Long,
+        @Min(1) @PathVariable directorId: Long
+    ): ResponseEntity<Void> =
+        if (service.setDirector(id, directorId)) ResponseEntity.ok().build()
+        else ResponseEntity.noContent().build()
+
+    @DeleteMapping("/{id}/director")
+    @SecurityRequirement(name = "AuthServer")
+    fun removeDirector(
+        @Min(1) @PathVariable id: Long
+    ): ResponseEntity<Void> =
+        if (service.removeDirector(id)) ResponseEntity.ok().build()
         else ResponseEntity.noContent().build()
 }
