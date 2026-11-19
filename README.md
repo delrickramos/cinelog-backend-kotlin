@@ -2,6 +2,8 @@
 
 Backend RESTful desenvolvido em **Kotlin** e **Spring Boot 4** para a plataforma **CineLog**, cumprindo todos os requisitos da **Opção 1 – Estendendo os serviços** da disciplina **Backend: Web Services** (Bacharelado em Sistemas de Informação - PUCPR, Prof. Vinícius Godoy Mendonça).
 
+**Vídeo no Youtube:** https://youtu.be/QfGRnU1YIdU?feature=shared
+
 ## 👥 Equipe
 
 - **Delrick Ramos** — [GitHub](https://github.com/delrickramos) · [LinkedIn](https://www.linkedin.com/in/delrickramos/)
