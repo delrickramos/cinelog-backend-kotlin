@@ -5,6 +5,37 @@ import br.pucpr.cinelog.genres.Genre
 import br.pucpr.cinelog.movies.Movie
 import br.pucpr.cinelog.reviews.Review
 import br.pucpr.cinelog.roles.Role
+import br.pucpr.cinelog.security.UserToken
+
+fun oneRole(
+    id: Long? = 1L,
+    name: String = "PREMIUM",
+    description: String = "Premium CineLog Reviewer"
+) = Role(
+    id = id,
+    name = name,
+    description = description
+)
+
+fun oneUserToken(
+    id: Long = 1L,
+    name: String = "John Doe",
+    roles: Set<String> = setOf("PREMIUM")
+) = UserToken(
+    id = id,
+    name = name,
+    roles = roles
+)
+
+fun oneAdminToken(
+    id: Long = 99L,
+    name: String = "Administrator",
+    roles: Set<String> = setOf("ADMIN")
+) = UserToken(
+    id = id,
+    name = name,
+    roles = roles
+)
 
 fun oneUser(
     id: Long? = 1L,

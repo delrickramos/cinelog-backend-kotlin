@@ -7,9 +7,8 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 
 data class ReviewRequest(
-    @NotNull
     @Min(1)
-    val userId: Long?,
+    val userId: Long? = null,
 
     @NotNull
     @Min(0)

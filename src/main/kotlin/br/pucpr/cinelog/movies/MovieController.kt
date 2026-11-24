@@ -9,6 +9,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -41,6 +42,8 @@ class MovieController(
             ?: ResponseEntity.notFound().build()
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun insert(
         @Valid @RequestBody request: MovieRequest
     ): ResponseEntity<MovieResponse> =
@@ -49,6 +52,8 @@ class MovieController(
             .let { ResponseEntity.status(HttpStatus.CREATED).body(it) }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun update(
         @Min(1) @PathVariable id: Long,
         @Valid @RequestBody request: MovieRequest
@@ -58,6 +63,8 @@ class MovieController(
             .let { ResponseEntity.ok(it) }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun patch(
         @Min(1) @PathVariable id: Long,
         @Valid @RequestBody request: PatchMovieRequest
@@ -75,6 +82,7 @@ class MovieController(
             ?: ResponseEntity.noContent().build()
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "AuthServer")
     fun deleteById(
         @Min(1) @PathVariable id: Long
@@ -83,6 +91,8 @@ class MovieController(
         else ResponseEntity.notFound().build()
 
     @PutMapping("/{id}/genres/{genreName}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun addGenre(
         @Min(1) @PathVariable id: Long,
         @PathVariable genreName: String
@@ -91,6 +101,7 @@ class MovieController(
         else ResponseEntity.noContent().build()
 
     @DeleteMapping("/{id}/genres/{genreName}")
+    @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "AuthServer")
     fun removeGenre(
         @Min(1) @PathVariable id: Long,
@@ -100,6 +111,8 @@ class MovieController(
         else ResponseEntity.noContent().build()
 
     @PutMapping("/{id}/director/{directorId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun setDirector(
         @Min(1) @PathVariable id: Long,
         @Min(1) @PathVariable directorId: Long
@@ -108,6 +121,7 @@ class MovieController(
         else ResponseEntity.noContent().build()
 
     @DeleteMapping("/{id}/director")
+    @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "AuthServer")
     fun removeDirector(
         @Min(1) @PathVariable id: Long

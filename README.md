@@ -58,56 +58,56 @@ erDiagram
 | `POST` | `/api/users` | Público | Cadastra novo usuário |
 | `GET` | `/api/users?role={role}&sortDir={ASC\|DESC}` | Público | Lista usuários com filtro por papel e ordenação |
 | `GET` | `/api/users/{id}` | Público | Busca usuário por ID (inclui `profile` e `roles`) |
-| `PATCH` | `/api/users/{id}` | Público | Atualiza o nome do usuário |
-| `PUT` | `/api/users/{id}/profile` | Público | Cria ou atualiza o `UserProfile` (`@OneToOne`) do usuário |
+| `PATCH` | `/api/users/{id}` | JWT (`Dono` ou `ADMIN`) | Atualiza o nome do usuário |
+| `PUT` | `/api/users/{id}/profile` | JWT (`Dono` ou `ADMIN`) | Cria ou atualiza o `UserProfile` (`@OneToOne`) do usuário |
 | `PUT` | `/api/users/{id}/roles/{name}` | JWT (`ADMIN`) | Associa um papel (`Role`) ao usuário |
 | `DELETE` | `/api/users/{id}` | JWT (`ADMIN`) | Remove usuário (impede exclusão do último `ADMIN`) |
 | `GET` | `/api/roles` | Público | Lista papéis cadastrados |
-| `POST` | `/api/roles` | Público | Cadastra novo papel |
+| `POST` | `/api/roles` | JWT (`ADMIN`) | Cadastra novo papel |
 
 ### Filmes (`/api/movies`) — *CRUD Completo + Associações + Filtros e Ordenação*
 | Método | Rota | Auth | Descrição |
 |---|---|---|---|
 | `GET` | `/api/movies?genre=&directorId=&minYear=&title=&sortDir=ASC\|DESC` | Público | Consulta com **filtragem combinada e ordenação** via query params |
 | `GET` | `/api/movies/{id}` | Público | Detalhes do filme (inclui diretor e gêneros) |
-| `POST` | `/api/movies` | Público | Cadastra novo filme |
-| `PUT` | `/api/movies/{id}` | Público | Atualiza todos os dados de um filme |
-| `PATCH` | `/api/movies/{id}` | Público | Atualização parcial de um filme |
-| `DELETE` | `/api/movies/{id}` | **JWT** | Exclui um filme (ação destrutiva autenticada) |
-| `PUT` | `/api/movies/{id}/genres/{genreName}` | Público | **Associa** um gênero (`Genre`) ao filme |
-| `DELETE` | `/api/movies/{id}/genres/{genreName}` | **JWT** | **Desassocia** um gênero (`Genre`) do filme |
-| `PUT` | `/api/movies/{id}/director/{directorId}` | Público | **Associa** um diretor (`Director`) ao filme |
-| `DELETE` | `/api/movies/{id}/director` | **JWT** | **Desassocia** o diretor do filme |
+| `POST` | `/api/movies` | **JWT (`ADMIN`)** | Cadastra novo filme |
+| `PUT` | `/api/movies/{id}` | **JWT (`ADMIN`)** | Atualiza todos os dados de um filme |
+| `PATCH` | `/api/movies/{id}` | **JWT (`ADMIN`)** | Atualização parcial de um filme |
+| `DELETE` | `/api/movies/{id}` | **JWT (`ADMIN`)** | Exclui um filme |
+| `PUT` | `/api/movies/{id}/genres/{genreName}` | **JWT (`ADMIN`)** | **Associa** um gênero (`Genre`) ao filme |
+| `DELETE` | `/api/movies/{id}/genres/{genreName}` | **JWT (`ADMIN`)** | **Desassocia** um gênero (`Genre`) do filme |
+| `PUT` | `/api/movies/{id}/director/{directorId}` | **JWT (`ADMIN`)** | **Associa** um diretor (`Director`) ao filme |
+| `DELETE` | `/api/movies/{id}/director` | **JWT (`ADMIN`)** | **Desassocia** o diretor do filme |
 
 ### Diretores (`/api/directors`) — *CRUD Completo*
 | Método | Rota | Auth | Descrição |
 |---|---|---|---|
 | `GET` | `/api/directors?nationality=&sortDir=ASC\|DESC` | Público | Lista diretores com filtro por nacionalidade e ordenação |
 | `GET` | `/api/directors/{id}` | Público | Busca diretor por ID |
-| `POST` | `/api/directors` | Público | Cadastra novo diretor |
-| `PUT` | `/api/directors/{id}` | Público | Atualiza todos os dados do diretor |
-| `PATCH` | `/api/directors/{id}` | Público | Atualiza parcialmente o diretor |
-| `DELETE` | `/api/directors/{id}` | **JWT** | Exclui um diretor (ação destrutiva autenticada) |
+| `POST` | `/api/directors` | **JWT (`ADMIN`)** | Cadastra novo diretor |
+| `PUT` | `/api/directors/{id}` | **JWT (`ADMIN`)** | Atualiza todos os dados do diretor |
+| `PATCH` | `/api/directors/{id}` | **JWT (`ADMIN`)** | Atualiza parcialmente o diretor |
+| `DELETE` | `/api/directors/{id}` | **JWT (`ADMIN`)** | Exclui um diretor |
 
 ### Gêneros (`/api/genres`) — *CRUD Completo*
 | Método | Rota | Auth | Descrição |
 |---|---|---|---|
 | `GET` | `/api/genres?sortDir=ASC\|DESC` | Público | Lista gêneros ordenados |
 | `GET` | `/api/genres/{id}` | Público | Busca gênero por ID |
-| `POST` | `/api/genres` | Público | Cadastra novo gênero |
-| `PATCH` | `/api/genres/{id}` | Público | Atualiza descrição do gênero |
-| `DELETE` | `/api/genres/{id}` | **JWT** | Exclui um gênero (ação destrutiva autenticada) |
+| `POST` | `/api/genres` | **JWT (`ADMIN`)** | Cadastra novo gênero |
+| `PATCH` | `/api/genres/{id}` | **JWT (`ADMIN`)** | Atualiza descrição do gênero |
+| `DELETE` | `/api/genres/{id}` | **JWT (`ADMIN`)** | Exclui um gênero |
 
 ### Avaliações e Comentários (`/api/reviews` & `/api/movies/{movieId}/reviews`)
 | Método | Rota | Auth | Descrição |
 |---|---|---|---|
-| `POST` | `/api/movies/{movieId}/reviews` | Público | Cria avaliação associando `User` e `Movie` |
+| `POST` | `/api/movies/{movieId}/reviews` | **JWT (`Dono` ou `ADMIN`)** | Cria avaliação associando `User` (padrão: usuário autenticado) e `Movie` |
 | `GET` | `/api/movies/{movieId}/reviews?sortDir=ASC\|DESC` | Público | Lista avaliações de um filme ordenadas pela nota |
 | `GET` | `/api/movies/{movieId}/reviews/stats` | Público | Retorna média de notas e total de avaliações do filme |
 | `GET` | `/api/reviews?movieId=&userId=&minRating=&sortDir=ASC\|DESC` | Público | Consulta global de avaliações com filtros e ordenação |
 | `GET` | `/api/reviews/{id}` | Público | Busca avaliação por ID |
-| `PATCH` | `/api/reviews/{id}` | Público | Atualiza nota ou comentário da avaliação |
-| `DELETE` | `/api/reviews/{id}` | **JWT** | Exclui uma avaliação (ação destrutiva autenticada) |
+| `PATCH` | `/api/reviews/{id}` | **JWT (`Dono` ou `ADMIN`)** | Atualiza nota ou comentário da avaliação |
+| `DELETE` | `/api/reviews/{id}` | **JWT (`Dono` ou `ADMIN`)** | Exclui uma avaliação |
 
 ---
 

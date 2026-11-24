@@ -9,6 +9,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -38,6 +39,8 @@ class DirectorController(
             ?: ResponseEntity.notFound().build()
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun insert(
         @Valid @RequestBody request: DirectorRequest
     ): ResponseEntity<DirectorResponse> =
@@ -46,6 +49,8 @@ class DirectorController(
             .let { ResponseEntity.status(HttpStatus.CREATED).body(it) }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun update(
         @Min(1) @PathVariable id: Long,
         @Valid @RequestBody request: DirectorRequest
@@ -55,6 +60,8 @@ class DirectorController(
             .let { ResponseEntity.ok(it) }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun patch(
         @Min(1) @PathVariable id: Long,
         @Valid @RequestBody request: PatchDirectorRequest
@@ -65,6 +72,7 @@ class DirectorController(
             ?: ResponseEntity.noContent().build()
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "AuthServer")
     fun deleteById(
         @Min(1) @PathVariable id: Long

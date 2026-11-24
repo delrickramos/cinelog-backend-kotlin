@@ -2,11 +2,13 @@ package br.pucpr.cinelog.reviews
 
 import br.pucpr.cinelog.movies.MovieRepository
 import br.pucpr.cinelog.reviews.responses.ReviewStatsResponse
+import br.pucpr.cinelog.security.UserToken
 import br.pucpr.cinelog.users.SortDir
 import br.pucpr.cinelog.users.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import kotlin.math.round
@@ -17,7 +19,10 @@ class ReviewService(
     val movieRepository: MovieRepository,
     val userRepository: UserRepository
 ) {
-    fun insert(movieId: Long, userId: Long, rating: Int, comment: String): Review {
+    fun insert(movieId: Long, userId: Long, rating: Int, comment: String, requester: UserToken): Review {
+        if (!requester.isAdmin && requester.id != userId) {
+            throw AccessDeniedException("You can only create reviews for your own user")
+        }
         val movie = movieRepository.findByIdOrNull(movieId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Movie $movieId not found!")
         val user = userRepository.findByIdOrNull(userId)
@@ -69,9 +74,12 @@ class ReviewService(
         return ReviewStatsResponse(movieId = movieId, count = count, averageRating = avg)
     }
 
-    fun patch(id: Long, rating: Int?, comment: String?): Review? {
+    fun patch(id: Long, rating: Int?, comment: String?, requester: UserToken): Review? {
         val review = repository.findByIdOrNull(id)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Review $id not found!")
+        if (!requester.isAdmin && review.user.id != requester.id) {
+            throw AccessDeniedException("Only the review author or an ADMIN can update this review")
+        }
         var changed = false
         if (rating != null && rating != review.rating) {
             review.rating = rating
@@ -83,13 +91,16 @@ class ReviewService(
         }
         if (!changed) return null
         return repository.save(review)
-            .also { log.info("Review {} updated", id) }
+            .also { log.info("Review {} updated by user {}", id, requester.id) }
     }
 
-    fun deleteById(id: Long): Boolean {
+    fun deleteById(id: Long, requester: UserToken): Boolean {
         val review = repository.findByIdOrNull(id) ?: return false
+        if (!requester.isAdmin && review.user.id != requester.id) {
+            throw AccessDeniedException("Only the review author or an ADMIN can delete this review")
+        }
         repository.delete(review)
-        log.warn("Review {} deleted", id)
+        log.warn("Review {} deleted by user {}", id, requester.id)
         return true
     }
 

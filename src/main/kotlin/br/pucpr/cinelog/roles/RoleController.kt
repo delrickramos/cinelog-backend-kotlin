@@ -1,8 +1,10 @@
 package br.pucpr.cinelog.roles
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -19,6 +21,8 @@ class RoleController(
             .let { ResponseEntity.ok(it) }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun insert(
         @Valid @RequestBody role: RoleRequest
     ): ResponseEntity<RoleResponse> =

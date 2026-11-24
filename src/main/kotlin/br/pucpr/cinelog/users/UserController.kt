@@ -1,5 +1,6 @@
 package br.pucpr.cinelog.users
 
+import br.pucpr.cinelog.security.UserToken
 import br.pucpr.cinelog.users.requests.LoginRequest
 import br.pucpr.cinelog.users.requests.PatchUserRequest
 import br.pucpr.cinelog.users.requests.UserProfileRequest
@@ -12,6 +13,7 @@ import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -52,21 +54,27 @@ class UserController(
             ?: ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
     @PatchMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "AuthServer")
     fun update(
         @Min(1) @PathVariable id: Long,
-        @Valid @RequestBody user: PatchUserRequest
+        @Valid @RequestBody user: PatchUserRequest,
+        @AuthenticationPrincipal requester: UserToken
     ): ResponseEntity<UserResponse> =
-        userService.update(id, user.name!!)
+        userService.update(id, user.name!!, requester)
             ?.let { UserResponse(it) }
             ?.let { ResponseEntity.ok(it) }
             ?: ResponseEntity.noContent().build()
 
     @PutMapping("/{id}/profile")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "AuthServer")
     fun updateProfile(
         @Min(1) @PathVariable id: Long,
-        @Valid @RequestBody profile: UserProfileRequest
+        @Valid @RequestBody profile: UserProfileRequest,
+        @AuthenticationPrincipal requester: UserToken
     ): ResponseEntity<UserResponse> =
-        userService.updateProfile(id, profile.toUserProfile())
+        userService.updateProfile(id, profile.toUserProfile(), requester)
             .let { UserResponse(it) }
             .let { ResponseEntity.ok(it) }
 

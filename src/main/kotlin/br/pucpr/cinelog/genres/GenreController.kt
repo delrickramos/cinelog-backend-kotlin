@@ -6,6 +6,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -34,6 +35,8 @@ class GenreController(
             ?: ResponseEntity.notFound().build()
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun insert(
         @Valid @RequestBody genre: GenreRequest
     ): ResponseEntity<GenreResponse> =
@@ -42,6 +45,8 @@ class GenreController(
             .let { ResponseEntity.status(HttpStatus.CREATED).body(it) }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "AuthServer")
     fun update(
         @Min(1) @PathVariable id: Long,
         @Valid @RequestBody request: PatchGenreRequest
@@ -52,6 +57,7 @@ class GenreController(
             ?: ResponseEntity.noContent().build()
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "AuthServer")
     fun deleteById(
         @Min(1) @PathVariable id: Long

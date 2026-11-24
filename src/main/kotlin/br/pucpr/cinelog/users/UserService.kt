@@ -2,12 +2,14 @@ package br.pucpr.cinelog.users
 
 import br.pucpr.cinelog.roles.RoleRepository
 import br.pucpr.cinelog.security.JWT
+import br.pucpr.cinelog.security.UserToken
 import br.pucpr.cinelog.users.responses.LoginResponse
 import br.pucpr.cinelog.users.responses.UserResponse
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
@@ -26,16 +28,22 @@ class UserService(
             .also { log.info("User {} created!", it.id) }
     }
 
-    fun update(id: Long, name: String): User? {
+    fun update(id: Long, name: String, requester: UserToken): User? {
+        if (!requester.isAdmin && requester.id != id) {
+            throw AccessDeniedException("Only the user or an ADMIN can update this user")
+        }
         val user = repository.findByIdOrNull(id)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $id not found!")
         if (user.name == name) return null
         user.name = name
         return repository.save(user)
-            .also { log.info("User {} updated!", it.id) }
+            .also { log.info("User {} updated by user {}!", it.id, requester.id) }
     }
 
-    fun updateProfile(id: Long, profile: UserProfile): User {
+    fun updateProfile(id: Long, profile: UserProfile, requester: UserToken): User {
+        if (!requester.isAdmin && requester.id != id) {
+            throw AccessDeniedException("Only the user or an ADMIN can update this profile")
+        }
         val user = repository.findByIdOrNull(id)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $id not found!")
         val existing = user.profile
@@ -47,7 +55,7 @@ class UserService(
             user.profile = profile
         }
         return repository.save(user)
-            .also { log.info("Profile updated for user {}", id) }
+            .also { log.info("Profile updated for user {} by user {}", id, requester.id) }
     }
 
     fun findAll(dir: SortDir): List<User> =
